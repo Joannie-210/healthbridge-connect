@@ -1,30 +1,30 @@
 import { StatsCard } from '@/components/StatsCard';
 import { StatusBadge } from '@/components/StatusBadge';
 import { useAuth } from '@/contexts/AuthContext';
-import { mockDashboardStats, mockAppointments, mockPatients, mockMessages } from '@/data/mockData';
-import { Users, CalendarDays, MessageSquare, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
+import { mockDashboardStats, mockAppointments, mockPatients } from '@/data/mockData';
+import { Users, CalendarDays, AlertTriangle, CheckCircle, ClipboardList, Activity } from 'lucide-react';
 
-export function DoctorDashboard() {
+export function NurseDashboard() {
   const { user } = useAuth();
   const stats = mockDashboardStats;
   const todayAppts = mockAppointments.filter((a) => a.date === '2026-02-14');
   const criticalPatients = mockPatients.filter((p) => p.status === 'critical');
-  const unreadMessages = mockMessages.filter((m) => !m.read);
+  const activePatients = mockPatients.filter((p) => p.status === 'active');
 
   return (
     <div className="space-y-8">
       <div>
         <h1 className="text-2xl font-display font-bold text-foreground">
-          Good morning, Dr. {user?.name?.split(' ').pop()}
+          Hello, {user?.name?.split(' ')[0]}
         </h1>
-        <p className="text-muted-foreground mt-1">Here's your clinical overview for today</p>
+        <p className="text-muted-foreground mt-1">Your care overview for today</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatsCard title="My Patients" value={stats.totalPatients} icon={Users} variant="primary" trend="+12 this week" />
+        <StatsCard title="Active Patients" value={activePatients.length} icon={Users} variant="primary" />
         <StatsCard title="Today's Appointments" value={stats.todayAppointments} icon={CalendarDays} variant="default" />
-        <StatsCard title="Pending Reviews" value={stats.pendingApprovals} icon={Clock} variant="warning" />
-        <StatsCard title="Critical Patients" value={stats.criticalPatients} icon={AlertTriangle} variant="danger" />
+        <StatsCard title="Tasks Pending" value={stats.pendingApprovals} icon={ClipboardList} variant="warning" />
+        <StatsCard title="Critical Alerts" value={criticalPatients.length} icon={AlertTriangle} variant="danger" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -43,7 +43,7 @@ export function DoctorDashboard() {
                   </div>
                   <div>
                     <p className="text-sm font-medium text-foreground">{appt.patientName}</p>
-                    <p className="text-xs text-muted-foreground">{appt.time} · {appt.type}</p>
+                    <p className="text-xs text-muted-foreground">{appt.time} · {appt.type} · {appt.doctorName}</p>
                   </div>
                 </div>
                 <StatusBadge status={appt.status} />
@@ -52,16 +52,17 @@ export function DoctorDashboard() {
           </div>
         </div>
 
-        {/* Critical Patients */}
+        {/* Patient Vitals / Critical */}
         <div className="bg-card rounded-xl border shadow-card p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-display font-semibold text-foreground">Critical Patients</h2>
-            <AlertTriangle className="w-4 h-4 text-destructive" />
+            <h2 className="font-display font-semibold text-foreground flex items-center gap-2">
+              <Activity className="w-4 h-4 text-destructive" /> Critical Alerts
+            </h2>
           </div>
           {criticalPatients.length === 0 ? (
             <div className="flex items-center gap-2 text-success p-4">
               <CheckCircle className="w-5 h-5" />
-              <span className="text-sm">No critical patients currently</span>
+              <span className="text-sm">All patients stable</span>
             </div>
           ) : (
             <div className="space-y-3">
@@ -85,32 +86,7 @@ export function DoctorDashboard() {
           )}
         </div>
       </div>
-
-      {/* Unread Messages */}
-      {unreadMessages.length > 0 && (
-        <div className="bg-card rounded-xl border shadow-card p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-display font-semibold text-foreground flex items-center gap-2">
-              <MessageSquare className="w-4 h-4 text-info" /> Unread Messages
-            </h2>
-            <span className="text-xs text-muted-foreground">{unreadMessages.length} unread</span>
-          </div>
-          <div className="space-y-3">
-            {unreadMessages.map((msg) => (
-              <div key={msg.id} className="flex items-start gap-3 p-3 rounded-lg bg-info/5 border border-info/10">
-                <div className="w-8 h-8 rounded-full bg-info/10 flex items-center justify-center text-info font-semibold text-xs shrink-0">
-                  {msg.senderName.split(' ').map(n => n[0]).join('')}
-                </div>
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-foreground">{msg.senderName}</p>
-                  <p className="text-xs text-muted-foreground truncate">{msg.content}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
-export default DoctorDashboard;
+export default NurseDashboard;  
